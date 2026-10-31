@@ -2,11 +2,9 @@ name: Build Orbital Strike Cannon
 
 on:
 push:
-branches: [main]
+branches:
+- main
 workflow_dispatch:
-
-permissions:
-contents: read
 
 jobs:
 build:
@@ -15,31 +13,21 @@ steps:
 - name: Checkout
 uses: actions/checkout@v4
 
-  - name: Setup Java
+  - name: Setup Java 21
     uses: actions/setup-java@v4
     with:
       distribution: temurin
       java-version: '21'
 
-  - name: Extract source
-    run: |
-      unzip -o OrbitalStrikeCannon.zip -d source
-
-  - name: Find Maven project
-    run: |
-      POM=$(find source -name pom.xml -print -quit)
-      if [ -z "$POM" ]; then
-        echo "ERROR: pom.xml tidak ditemukan!"
-        exit 1
-      fi
-      echo "POM_PATH=$POM" >> "$GITHUB_ENV"
+  - name: Extract ZIP
+    run: unzip -o OrbitalStrikeCannon.zip -d source
 
   - name: Build plugin
-    run: mvn -B -f "$POM_PATH" clean package
+    run: mvn -B -f source/pom.xml clean package
 
   - name: Upload JAR
     uses: actions/upload-artifact@v4
     with:
       name: OrbitalStrikeCannon
-      path: source/**/target/*.jar
+      path: source/target/*.jar
       if-no-files-found: error
